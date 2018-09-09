@@ -1,4 +1,4 @@
-/******TMP102 Sensor Hal Drivergit ****************/
+/******TMP102 Sensor Hal Driver****************/
 
 #include "stm32f4xx_hal.h"
 #include "main.h"
