@@ -1,4 +1,5 @@
 /******TMP102 Sensor Hal Driver****************/
+/*****This project developed with using HAL libraries*****/
 
 #include "stm32f4xx_hal.h"
 #include "main.h"
@@ -101,7 +102,7 @@ void SystemClock_Config(void) {
 	
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 	
-	/**Ana dahili regulatör çikis gerilimini konfigüre et
+	/**Ana dahili regulatÃ¶r Ã§ikis gerilimini konfigÃ¼re et
     */
 
 	__HAL_RCC_PWR_CLK_ENABLE();
@@ -151,13 +152,13 @@ void SystemClock_Config(void) {
 	
 	}
 	
-	//Systick Interrupt Time'i konfigüre et
+	//Systick Interrupt Time'i konfigÃ¼re et
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 	
-	//Systick'i konfigüre et
+	//Systick'i konfigÃ¼re et
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 	
-	//Systick_IRQn interrupt'i konfigüre et
+	//Systick_IRQn interrupt'i konfigÃ¼re et
 	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 	
 }
