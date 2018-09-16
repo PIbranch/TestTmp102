@@ -8,11 +8,13 @@
 
 I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_USART3_UART_Init(void);
 
 uint8_t tmp102_conf_reg[2];
 double temper_res;
@@ -28,16 +30,17 @@ int main(void) {
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MX_USART2_UART_Init();
-
+  //MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
+	
 	tmp102_init(&hi2c1);
 	
 	while(1) {
 	
 		temper_res = tmp102_temperature_read(&hi2c1);
 	
-		my_printf(&huart2, "Current temperature: %f\n", temper_res);
-		
+		//my_printf(&huart2, "Current te¦mperature: %f\n", temper_res);
+		my_printf(&huart3, "Current temperature");	
 		HAL_Delay(10);
 	}
 
@@ -89,6 +92,32 @@ static void   MX_USART2_UART_Init() {
 	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
 	
 	if(HAL_UART_Init(&huart2) != HAL_OK) {
+	
+		_Error_Handler(__FILE__, __LINE__);
+	
+	}
+
+}
+
+static void  MX_USART3_UART_Init() {
+	
+	huart3.Instance = USART3;
+	
+	huart3.Init.BaudRate = 115200;
+	
+	huart3.Init.WordLength = UART_WORDLENGTH_8B;
+	
+	huart3.Init.StopBits = UART_STOPBITS_1;
+	
+	huart3.Init.Parity = UART_PARITY_NONE;
+	
+	huart3.Init.Mode = UART_MODE_TX_RX;
+	
+	huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	
+	huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+	
+	if(HAL_UART_Init(&huart3) != HAL_OK) {
 	
 		_Error_Handler(__FILE__, __LINE__);
 	

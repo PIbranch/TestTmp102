@@ -8,10 +8,10 @@
 #include <stdarg.h>
 #include "main.h"
 
-void vprint(const char *fmt, va_list argp, UART_HandleTypeDef *uart2);
+void vprint(const char *fmt, va_list argp, UART_HandleTypeDef *uart);
 
  // custom printf() function
-void my_printf(UART_HandleTypeDef *uart2, const char *fmt, ...);
+void my_printf(UART_HandleTypeDef *uart, const char *fmt, ...);
 
 
 #endif
