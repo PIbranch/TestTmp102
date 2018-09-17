@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include "main.h"
 
-#define TMP_102_ADRESS 0x90 //ADD0'i topraga bagladik. Write tmp102 is (0x48 << 1) = 0x90, read tmp102 is 0x91 
+#define TMP_102_ADRESS 0x90 //ADD0 is connected to ground. Write tmp102 is (0x48 << 1) = 0x90, read tmp102 is 0x91 
 
 //Conversion rate set by CR1 and CR0 bits
 
@@ -31,7 +31,7 @@
 #define CONF_REG_CONT_CONV									 ~0x80 //To configure continuous conversion mode
 #define CONF_REG_EM										 0x10 //To configure extended mode
 #define CONF_REG_AL										 0x20	//Reading the AL bit to learn comparator status
-#define CONF_REG_CONV_RATE_MSK(NUM)    ( NUM & ~0x0C)
+#define CONF_REG_CONV_RATE_MSK(NUM)    ( NUM & ~0xC0)
 #define CONF_REG_CONV_RATE_0_25				 0x00 //Conversion Rate 0.25Hz
 #define CONF_REG_CONV_RATE_1					 0x01 //Conversion Rate 1 Hz
 #define CONF_REG_CONV_RATE_4					 0x02 //Conversion Rate 4 Hz (default)
@@ -50,7 +50,7 @@ void tmp102_write(I2C_HandleTypeDef *i2c, uint8_t pointer_reg, uint8_t reg[2]);
 void tmp102_read(I2C_HandleTypeDef *i2c, uint8_t pointer_reg,\
 	uint8_t *read_val_reg);
 
-double tmp102_temperature_read(I2C_HandleTypeDef *i2c);
+uint8_t tmp102_temperature_read(I2C_HandleTypeDef *i2c, double *temparature_result);
 
 void tmp102_conf_shutdown_mode(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 	uint8_t is_shutdown_mod);

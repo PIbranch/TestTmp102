@@ -1,5 +1,8 @@
 #include "tmp_102.h"
 
+//This function is used to show temperature value which is negative or positive or negative
+//This function is used because the temperature values are sended two comlement format and
+//a converter functson whsch can convert the values are sended by the tmp102
 uint16_t twoComlementFunc(uint16_t signed_num_bin_arr, uint8_t size) {
 
 	uint8_t flag = 0;
@@ -38,18 +41,22 @@ void tmp102_write(I2C_HandleTypeDef *i2c, uint8_t pointer_reg, uint8_t reg[2]) {
 	
 	HAL_I2C_Master_Transmit(i2c, TMP_102_ADRESS, data, 3, 100);
 }
-	
+
+//This func is used to read the register which is determined by the pointer register
 void tmp102_read(I2C_HandleTypeDef *i2c, uint8_t pointer_reg, uint8_t *read_val_reg) {
 	
 	HAL_I2C_Mem_Read(i2c, TMP_102_ADRESS, pointer_reg, 1, read_val_reg, 2, 100);
 }	
-double tmp102_temperature_read(I2C_HandleTypeDef *i2c) {
+
+//this function is used to read temperature value which is sent by the tmp102
+//if temperature is negative, sign is non-zero 
+uint8_t tmp102_temperature_read(I2C_HandleTypeDef *i2c, double *temparature_result) {
 
 	uint8_t temparature_val[2];
 	
 	uint8_t buf[2];
 	
-	double temparature_result; 
+	uint8_t sign; 
 	
 	tmp102_read(i2c, POINTER_REGISTER_TEMP, buf);
 	
@@ -59,88 +66,77 @@ double tmp102_temperature_read(I2C_HandleTypeDef *i2c) {
 	
 	if( temparature_val[1] & 0x08 ) {
 		
-		temparature_result = ( ( temparature_val[1] << 8 ) | temparature_val[0] ) ;
+	*temparature_result = ( ( temparature_val[1] << 8 ) | temparature_val[0] ) ;
 		
-		temparature_result = ( twoComlementFunc( (uint16_t)temparature_result, 12) * 0.0625 );
+	*temparature_result = ( twoComlementFunc( (uint16_t)temparature_result, 12) * 0.0625 );
 	
+		sign = 1;
 	}
-	else
-		temparature_result = ( ( ( temparature_val[1] << 8 ) | temparature_val[0] ) * 0.0625 ) ;
+	else {
+	*temparature_result = ( ( ( temparature_val[1] << 8 ) | temparature_val[0] ) * 0.0625 ) ;
+		
+		sign = 0;
+	}
 	
-	return temparature_result;
+	return sign;
 }
 
+//To set tmp102 working in shutdown mode
 void tmp102_conf_shutdown_mode(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 uint8_t is_shutdown_mod) {
-
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 	
 	if(is_shutdown_mod == SET)
 		config_reg[0] |= CONF_REG_SHUTDOWN_MODE;
 	else
 		config_reg[0] &= ~CONF_REG_SHUTDOWN_MODE;	
 	
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 
+//To dedicate device in comparator or interrupt mode
 void tmp102_conf_thermostat_mode(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 uint8_t thermostat_mod_select) {
-
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 	
 	if(thermostat_mod_select == THERMOSTAT_MODE_INTERRUPT )
 		config_reg[0] |= CONF_REG_THERMOSTAT_MODE; //tmp102 in interrupt mode 
 	else if(thermostat_mod_select == THERMOSTAT_MODE_COMPARATOR)
 		config_reg[0] &= ~CONF_REG_THERMOSTAT_MODE; //tmp102 in comparator mode
  	
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
-	
+
+//To dedicate tmp102 working in active low or active high mode
 void tmp102_conf_polarity_mode(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 uint8_t is_polarity_mod) {
-
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 	
 	if(is_polarity_mod == POLARITY_MODE_ALERT_ACTIVE_HIGH)
 		config_reg[0] |= CONF_REG_POLARITY_MODE; //tmp102 alert active high
 	else if(is_polarity_mod == POLARITY_MODE_ALERT_ACTIVE_LOW)
 		config_reg[0] &= ~CONF_REG_POLARITY_MODE; //tmp102 alert active low (default)
 
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 
+//To set consecutive fault value configuration of tmp102 configuration register
 void tmp102_conf_consecutive_fault_count(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 uint8_t consecutive_fault_count) {
-
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 	
 	//Please set consecutive fault counts to active alert pin alarm
 	config_reg[0] = ( CONF_REG_CONS_FAULT_MASK(config_reg[0]) | consecutive_fault_count );
-	
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 
+//
 void tmp102_conf_converter_resolution(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 	uint8_t converter_resolution) {
-	
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 		
 	config_reg[0] = ( CONF_REG_CONV_RES_MASK(config_reg[0]) | (converter_resolution << 5) );
-		
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 	
+//To set conversion mode
 void tmp102_conf_os_mode(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 	uint8_t is_os_mode_set) {
-
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 		
 	if(is_os_mode_set)
 		config_reg[0] |= CONF_REG_ONE_SHOT_CONV;
 	else
 		config_reg[0] &= CONF_REG_CONT_CONV;
-
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 	
 uint8_t tmp102_get_oneshot_mode_status(I2C_HandleTypeDef *i2c, uint8_t *config_reg) {
@@ -153,14 +149,11 @@ uint8_t tmp102_get_oneshot_mode_status(I2C_HandleTypeDef *i2c, uint8_t *config_r
 void tmp102_conf_extended_mode(I2C_HandleTypeDef *i2c, uint8_t *config_reg,\
 uint8_t is_extended_mode_set) {
 
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
-	
 	if(	is_extended_mode_set )
 		config_reg[1] |= CONF_REG_EM;
 	else
 		config_reg[1] &= ~CONF_REG_EM;
 	
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 
 uint8_t tmp102_get_alert_status(I2C_HandleTypeDef *i2c, uint8_t *config_reg) {
@@ -176,12 +169,8 @@ uint8_t tmp102_get_alert_status(I2C_HandleTypeDef *i2c, uint8_t *config_reg) {
 }
 
 void tmp102_conf_conversion_rate(I2C_HandleTypeDef *i2c, uint8_t *config_reg, uint8_t conver_rate) {
-
-	//tmp102_read(i2c, POINTER_REGISTER_CONF, config_reg);
 	
 	config_reg[1] = ( CONF_REG_CONV_RATE_MSK( config_reg[1] ) | ( conver_rate << 6 ) ); 
-
-	//tmp102_write(i2c, POINTER_REGISTER_CONF, config_reg);
 }
 
 void tmp102_tlow_and_thigh_set(I2C_HandleTypeDef *i2c, int16_t t_low_val,\
