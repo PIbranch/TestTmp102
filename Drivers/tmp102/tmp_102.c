@@ -60,12 +60,14 @@ uint8_t tmp102_temperature_read(I2C_HandleTypeDef *i2c, double *temparature_resu
 	
 	tmp102_read(i2c, POINTER_REGISTER_TEMP, buf);
 	
+	//To read the bits between 7 and 0
 	temparature_val[0] = ( ( buf[0] << 4  ) | ( buf[1] >> 4 ) );
 	
+	//To read the bits between 8 and 11
 	temparature_val[1] = ( buf[0] >> 4 );
 	
 	if( temparature_val[1] & 0x08 ) {
-		
+	//To evaluate the temparature value	
 	*temparature_result = ( ( temparature_val[1] << 8 ) | temparature_val[0] ) ;
 		
 	*temparature_result = ( twoComlementFunc( (uint16_t)temparature_result, 12) * 0.0625 );
